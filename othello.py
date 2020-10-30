@@ -12,9 +12,8 @@ class Board:
         self.state[54] = -1
         self.state[55] = 1
 
-        # returns the score as the difference between the number of 1s and the number of -1s
-
-    def evaluate(self):
+    # returns the score as the difference between the number of 1s and the number of -1s
+    def evaluate(self) -> int:
         value = 0
         for i in range(100):
             if self.state[i] == 1:
@@ -23,8 +22,7 @@ class Board:
                 value = value - 1
         return value
 
-        # returns a new board that is a copy of the current board
-
+    # returns a new board that is a copy of the current board
     def copy(self):
         board = Board()
         for i in range(100):
@@ -32,7 +30,7 @@ class Board:
         return board
 
     # given a x,y position, returns the tile within the 1d list
-    def index(self, x, y):
+    def index(self, x, y) -> int:
         if 0 <= x < 10 and 0 <= y < 10:
             return self.state[x + y * 10]
         else:
@@ -40,7 +38,7 @@ class Board:
             return -2
 
     # given an x,y coordinate, and an id of 1 or -1, returns true if this is a valid move
-    def can_place(self, x, y, id):
+    def can_place(self, x, y, id) -> bool:
         # square is not empty? return false
         if self.index(x, y) != 0:
             return False
@@ -69,11 +67,9 @@ class Board:
             # if we found a piece of our own color, then this is a valid move
             if self.index(i, j) == id:
                 return True
-                # if I can't capture in any direction, I can't place here
-        return False
+        return False  # if I can't capture in any direction, I can't place here
 
-        # given an x,y coordinate, and an id of 1 or -1, place a tile (if valid) at x,y, and modify the state accordingly
-
+    # given an x,y coordinate, and an id of 1 or -1, place a tile (if valid) at x,y, and modify the state accordingly
     def place(self, x, y, id):
         # don't bother if it isn't a valid move
         if not self.can_place(x, y, id):
@@ -109,7 +105,7 @@ class Board:
                     k, l = xop(k), yop(l)
 
     # returns a list of all valid x,y moves for a given id
-    def valid_moves(self, id):
+    def valid_moves(self, id) -> list:
         moves = []
         for x in range(10):
             for y in range(10):
@@ -117,8 +113,7 @@ class Board:
                     moves = moves + [(x, y)]
         return moves
 
-        # print out the board.  1 is X, -1 is O
-
+    # print out the board.  1 is X, -1 is O
     def print_board(self):
         for y in range(10):
             line = ""
@@ -131,8 +126,7 @@ class Board:
                     line = line + "."
             print(line)
 
-            # state is an end game if there are no empty places
-
+    # state is an end game if there are no empty places
     def end(self):
         return not 0 in self.state
 
@@ -145,17 +139,17 @@ def game():
     turn = 1
     while True:
         # get the moves
-        movelist = board.valid_moves(turn)
+        move_list = board.valid_moves(turn)
         # no moves, skip the turn
-        if len(movelist) == 0:
+        if len(move_list) == 0:
             turn = -turn
             continue
         # pick a move totally at random
-        i = random.randint(0, len(movelist) - 1)
+        i = random.randint(0, len(move_list) - 1)
         # make a new board
         board = board.copy()
         # make the move
-        board.place(movelist[i][0], movelist[i][1], turn)
+        board.place(move_list[i][0], move_list[i][1], turn)
         # swap players
         turn = -turn
         # print
