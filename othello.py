@@ -188,8 +188,43 @@ def get_greedy_move(board, move_list, turn):
     move = move_list[random.randrange(0, len(move_list))]
     return move
 
+
 def get_min_max_move(board, move_list, turn):
-    pass
+
+    # go through all the moves to score them
+    for i in range(len(move_list)):
+        value = board.score(turn)
+        # end game? don't go further, use the score
+        if value != 0:
+            move_list[i] = (value, move_list[i])
+        else:
+            # need to look at opponent
+            # get a list of all countermoves
+            countermoves = board.valid_moves(board.other_player(turn))
+            if len(countermoves) > 0:
+                # score them
+                for j in range(len(countermoves)):
+                    # put the score at front of move so I can sort
+                    countermoves[j] = (board.score(turn), countermoves[j])
+                # rank them: but this time with the min first
+                countermoves.sort(reverse=False)
+                # get the score of the lowest move
+                worst_score = countermoves[0][0]
+                # now use that score to value my move
+                move_list[i] = (worst_score, move_list[i])
+
+    # now pick the best of the worst
+    move_list.sort(reverse=True)
+    # get a sublist of all the moves that are best
+    index = 0
+    top_score = move_list[0][0]
+    while index < len(move_list) and move_list[index][0] == top_score:
+        index = index + 1
+    move_list = move_list[:index]
+    # moves now contains only my best moves (however many there are)
+    # pick one randomly and return
+    move = move_list[random.randrange(0, len(move_list))]
+    return move  # cut off the score and just return move
 
 
 # this plays a game between two players that will play completely randomly
@@ -223,7 +258,10 @@ def game():
     print("Score is", board.evaluate())
 
 
-# this plays a game between two players that use a "greedy strategy"
+# greedy player
+# one who goes for the win
+# if it can't win, play random
+# it should select a set of moves with the best score, and choose one randomly from it
 def greedy():
     # make the starting board
     board = Board()
@@ -257,12 +295,47 @@ def greedy():
     print("O score is", score_o)
 
 
-# this plays a game between two players that will play using the mix_max algorithm
+# one depth minimax
+# look at all my moves, then all opponents, no further
+#  behavior?  go for the win.  if no win, will block opponent
 def min_max():
     depth = int(input("Enter the search depth: "))
 
-    if 1 < depth <= 2:
-
+    if depth == 1:
+        # make the starting board
+        board = Board()
+        # start with player 1
+        turn = 1
+        while True:
+            # get the moves
+            move_list = board.valid_moves(turn)
+            # no moves, skip the turn
+            if len(move_list) == 0:
+                turn = -turn
+                continue
+            # use greedy algorithm to choose a move
+            move = (
+                get_min_max_move(board, move_list, turn)[1]
+                if turn == 1
+                else random.choice(move_list)
+            )
+            # make a new board
+            board = board.copy()
+            # make the move
+            board.place(move[0], move[1], turn)
+            # swap players
+            turn = -turn
+            # print
+            board.print_board()
+            # wait for user to press a key
+            # input()
+            # game over? stop.
+            if board.end():
+                break
+        # print("Score is", board.evaluate())
+        winner, score_x, score_o = board.win()
+        print("X score is", score_x)
+        print("O score is", score_o)
     else:
         print("Invalid depth!")
 
