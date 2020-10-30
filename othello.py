@@ -162,6 +162,11 @@ def game():
     print("Score is", board.evaluate())
 
 
+# this plays a game between two players that use a "greedy strategy"
+def greedy():
+
+
+
 # this plays a game between two players that will play using the mix_max algorithm
 def min_max():
     pass
