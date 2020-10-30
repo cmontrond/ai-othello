@@ -1,4 +1,11 @@
 import random
+from enum import Enum
+
+
+class AiType(Enum):
+    RANDOM = 1
+    GREEDY = 2
+    MINMAX = 3
 
 
 # this class stores an othello board state
@@ -314,11 +321,7 @@ def min_max():
                 turn = -turn
                 continue
             # use greedy algorithm to choose a move
-            move = (
-                get_min_max_move(board, move_list, turn)[1]
-                if turn == 1
-                else random.choice(move_list)
-            )
+            move = get_min_max_move(board, move_list, turn)[1]
             # make a new board
             board = board.copy()
             # make the move
@@ -342,5 +345,5 @@ def min_max():
 
 if __name__ == "__main__":
     # game()
-    # greedy()
-    min_max()
+    greedy()
+    # min_max()
