@@ -188,6 +188,9 @@ def get_greedy_move(board, move_list, turn):
     move = move_list[random.randrange(0, len(move_list))]
     return move
 
+def get_min_max_move(board, move_list, turn):
+    pass
+
 
 # this plays a game between two players that will play completely randomly
 def game():
@@ -256,9 +259,15 @@ def greedy():
 
 # this plays a game between two players that will play using the mix_max algorithm
 def min_max():
-    pass
+    depth = int(input("Enter the search depth: "))
+
+    if 1 < depth <= 2:
+
+    else:
+        print("Invalid depth!")
 
 
 if __name__ == "__main__":
     # game()
-    greedy()
+    # greedy()
+    min_max()
