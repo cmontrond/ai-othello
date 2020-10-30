@@ -5,7 +5,7 @@ from enum import Enum
 class AiType(Enum):
     RANDOM = 1
     GREEDY = 2
-    MINMAX = 3
+    MINIMAX = 3
 
 
 # this class stores an othello board state
