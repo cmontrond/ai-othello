@@ -8,6 +8,12 @@ class AiType(Enum):
     MINIMAX = 3
 
 
+class Optimization(Enum):
+    ALPHA_BETA = 1  # Alpha-Beta pruning, allowing for deeper searches
+    HEURISTIC = 2  # A better evaluation heuristic
+    PRUNING = 3  # Pruning of previously seen board states
+
+
 # this class stores an othello board state
 # the state is handled as a 1d list that stores a 10x10 board.  1 and -1 are the two colors, 0 are empty squares
 class Board:
@@ -341,6 +347,50 @@ def min_max():
         print("O score is", score_o)
     else:
         print("Invalid depth!")
+
+
+def run_game(ai_type: AiType):
+    # if ai type in minimax, ask the user for the depth
+    depth = 1
+    if ai_type == AiType.MINIMAX:
+        depth = int(input("Enter the search depth: "))
+
+    # make the starting board
+    board = Board()
+    # start with player 1
+    turn = 1
+    while True:
+        # get the moves
+        move_list = board.valid_moves(turn)
+        # no moves, skip the turn
+        if len(move_list) == 0:
+            turn = -turn
+            continue
+
+        # select an algorithm, defaults to random
+        move = random.choice(move_list)
+        if ai_type == AiType.GREEDY:
+            move = get_greedy_move(board, move_list, turn)[1]
+        elif ai_type == AiType.MINIMAX:
+            move = get_min_max_move(board, move_list, turn)[1]
+
+        # make a new board
+        board = board.copy()
+        # make the move
+        board.place(move[0], move[1], turn)
+        # swap players
+        turn = -turn
+        # print
+        board.print_board()
+        # wait for user to press a key
+        # input()
+        # game over? stop.
+        if board.end():
+            break
+    # print("Score is", board.evaluate())
+    winner, score_x, score_o = board.win()
+    print("X score is", score_x)
+    print("O score is", score_o)
 
 
 if __name__ == "__main__":
