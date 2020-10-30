@@ -22,6 +22,40 @@ class Board:
                 value = value - 1
         return value
 
+    # win return 1,-1, ' ' (game isn't over), or '-' for tie. it also returns the score
+    def win(self):
+        score_x = 0
+        score_o = 0
+        for i in range(100):
+            if self.state[i] == 1:
+                score_x += 1
+            elif self.state[i] == -1:
+                score_o += 1
+        if not self.end():
+            return " ", score_x, score_o
+        if score_x > score_o:
+            return 1, score_x, score_o
+        elif score_o > score_x:
+            return -1, score_x, score_o
+        elif score_x == score_o:
+            return "-", score_x, score_o
+
+    # swaps player
+    def other_player(self, turn):
+        return -turn
+
+    # score gives a value to the board from the point of view of the player
+    def score(self, player):
+        winner, score_x, score_o = self.win()
+        if winner == 1:
+            return 10
+        if winner == self.other_player(player):
+            return -10
+        if winner == "-":
+            return -5
+        # game ongoing? score 0
+        return 0
+
     # returns a new board that is a copy of the current board
     def copy(self):
         board = Board()
@@ -125,10 +159,34 @@ class Board:
                 else:
                     line = line + "."
             print(line)
+        print()
 
     # state is an end game if there are no empty places
     def end(self):
         return not 0 in self.state
+
+
+def get_greedy_move(board, move_list, turn):
+    # go through the moves and score them
+    for i in range(len(move_list)):
+        value = board.score(turn)
+        # put the score as a tuple in front of the move
+        move_list[i] = (value, move_list[i])
+
+    # now I can sort them, biggest value first
+    move_list.sort(reverse=True)
+
+    # get a sublist of all the moves that are best
+    index = 0
+    top_score = move_list[0][0]
+    while index < len(move_list) and move_list[index][0] == top_score:
+        index += 1
+    move_list = move_list[:index]
+
+    # move_list now contains only my best moves (however many there are)
+    # pick one randomly and return
+    move = move_list[random.randrange(0, len(move_list))]
+    return move
 
 
 # this plays a game between two players that will play completely randomly
@@ -164,7 +222,36 @@ def game():
 
 # this plays a game between two players that use a "greedy strategy"
 def greedy():
-
+    # make the starting board
+    board = Board()
+    # start with player 1
+    turn = 1
+    while True:
+        # get the moves
+        move_list = board.valid_moves(turn)
+        # no moves, skip the turn
+        if len(move_list) == 0:
+            turn = -turn
+            continue
+        # use greedy algorithm to choose a move
+        move = get_greedy_move(board, move_list, turn)[1]
+        # make a new board
+        board = board.copy()
+        # make the move
+        board.place(move[0], move[1], turn)
+        # swap players
+        turn = -turn
+        # print
+        board.print_board()
+        # wait for user to press a key
+        # input()
+        # game over? stop.
+        if board.end():
+            break
+    # print("Score is", board.evaluate())
+    winner, score_x, score_o = board.win()
+    print("X score is", score_x)
+    print("O score is", score_o)
 
 
 # this plays a game between two players that will play using the mix_max algorithm
@@ -173,4 +260,5 @@ def min_max():
 
 
 if __name__ == "__main__":
-    game()
+    # game()
+    greedy()
