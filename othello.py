@@ -162,5 +162,10 @@ def game():
     print("Score is", board.evaluate())
 
 
+# this plays a game between two players that will play using the mix_max algorithm
+def min_max():
+    pass
+
+
 if __name__ == "__main__":
     game()
