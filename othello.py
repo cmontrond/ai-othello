@@ -2,7 +2,7 @@ import random
 from enum import Enum
 
 
-class AiType(Enum):
+class AI(Enum):
     RANDOM = 1
     GREEDY = 2
     MINIMAX = 3
@@ -44,14 +44,14 @@ class Board:
                 score_x += 1
             elif self.state[i] == -1:
                 score_o += 1
-        if not self.end():
-            return " ", score_x, score_o
+        # if not self.end():
+        #     return " ", score_x, score_x, score_o
         if score_x > score_o:
-            return 1, score_x, score_o
-        elif score_o > score_x:
-            return -1, score_x, score_o
-        elif score_x == score_o:
-            return "-", score_x, score_o
+            return 1, score_x, score_x, score_o
+        if score_o > score_x:
+            return -1, score_o, score_x, score_o
+        if score_x == score_o:
+            return "-", score_x, score_x, score_o
 
     # swaps player
     def other_player(self, turn):
@@ -59,13 +59,13 @@ class Board:
 
     # score gives a value to the board from the point of view of the player
     def score(self, player):
-        winner, score_x, score_o = self.win()
-        if winner == 1:
-            return 10
+        winner, winner_score, score_x, score_o = self.win()
+        if winner == player:
+            return winner_score * 10
         if winner == self.other_player(player):
-            return -10
+            return winner_score * -10
         if winner == "-":
-            return -5
+            return winner_score * -5
         # game ongoing? score 0
         return 0
 
@@ -182,7 +182,9 @@ class Board:
 def get_greedy_move(board, move_list, turn):
     # go through the moves and score them
     for i in range(len(move_list)):
-        value = board.score(turn)
+        board_with_move = board.copy()
+        board_with_move.place(move_list[i][0], move_list[i][1], turn)
+        value = board_with_move.score(turn)
         # put the score as a tuple in front of the move
         move_list[i] = (value, move_list[i])
 
@@ -202,7 +204,7 @@ def get_greedy_move(board, move_list, turn):
     return move
 
 
-def get_min_max_move(board, move_list, turn):
+def get_mini_max_move(board, move_list, turn):
 
     # go through all the moves to score them
     for i in range(len(move_list)):
@@ -311,7 +313,7 @@ def greedy():
 # one depth minimax
 # look at all my moves, then all opponents, no further
 #  behavior?  go for the win.  if no win, will block opponent
-def min_max():
+def mini_max():
     depth = int(input("Enter the search depth: "))
 
     if depth == 1:
@@ -327,7 +329,7 @@ def min_max():
                 turn = -turn
                 continue
             # use greedy algorithm to choose a move
-            move = get_min_max_move(board, move_list, turn)[1]
+            move = get_mini_max_move(board, move_list, turn)[1]
             # make a new board
             board = board.copy()
             # make the move
@@ -349,10 +351,10 @@ def min_max():
         print("Invalid depth!")
 
 
-def run_game(ai_type: AiType):
+def run_game(ai_type: AI):
     # if ai type in minimax, ask the user for the depth
     depth = 1
-    if ai_type == AiType.MINIMAX:
+    if ai_type == AI.MINIMAX:
         depth = int(input("Enter the search depth: "))
 
     # make the starting board
@@ -369,10 +371,14 @@ def run_game(ai_type: AiType):
 
         # select an algorithm, defaults to random
         move = random.choice(move_list)
-        if ai_type == AiType.GREEDY:
-            move = get_greedy_move(board, move_list, turn)[1]
-        elif ai_type == AiType.MINIMAX:
-            move = get_min_max_move(board, move_list, turn)[1]
+        if ai_type == AI.GREEDY:
+            move = (
+                get_greedy_move(board, move_list, turn)[1]
+                if turn == 1
+                else random.choice(move_list)
+            )
+        elif ai_type == AI.MINIMAX:
+            move = get_mini_max_move(board, move_list, turn)[1]
 
         # make a new board
         board = board.copy()
@@ -388,12 +394,13 @@ def run_game(ai_type: AiType):
         if board.end():
             break
     # print("Score is", board.evaluate())
-    winner, score_x, score_o = board.win()
+    winner, winner_score, score_x, score_o = board.win()
     print("X score is", score_x)
     print("O score is", score_o)
 
 
 if __name__ == "__main__":
     # game()
-    greedy()
+    # greedy()
     # min_max()
+    run_game(AI.GREEDY)
