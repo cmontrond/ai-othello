@@ -181,6 +181,9 @@ class Board:
 
 def get_greedy_move(board, move_list, turn):
     # go through the moves and score them
+    print("board", board)
+    print("movelist", board)
+    print("turn", board)
     for i in range(len(move_list)):
         board_with_move = board.copy()
         board_with_move.place(move_list[i][0], move_list[i][1], turn)
@@ -208,7 +211,9 @@ def get_mini_max_move(board, move_list, turn):
 
     # go through all the moves to score them
     for i in range(len(move_list)):
-        value = board.score(turn)
+        board_with_move = board.copy()
+        board_with_move.place(move_list[i][0], move_list[i][1], turn)
+        value = board_with_move.score(turn)
         # end game? don't go further, use the score
         if value != 0:
             move_list[i] = (value, move_list[i])
@@ -220,6 +225,8 @@ def get_mini_max_move(board, move_list, turn):
                 # score them
                 for j in range(len(countermoves)):
                     # put the score at front of move so I can sort
+                    board_with_move = board.copy()
+                    board_with_move.place(countermoves[j][0], countermoves[j][1], turn)
                     countermoves[j] = (board.score(turn), countermoves[j])
                 # rank them: but this time with the min first
                 countermoves.sort(reverse=False)
@@ -361,6 +368,7 @@ def run_game(ai_type: AI):
     board = Board()
     # start with player 1
     turn = 1
+    debug = 0
     while True:
         # get the moves
         move_list = board.valid_moves(turn)
@@ -378,7 +386,11 @@ def run_game(ai_type: AI):
                 else random.choice(move_list)
             )
         elif ai_type == AI.MINIMAX:
-            move = get_mini_max_move(board, move_list, turn)[1]
+            move = (
+                get_mini_max_move(board, move_list, turn)[1]
+                if turn == 1
+                else random.choice(move_list)
+            )
 
         # make a new board
         board = board.copy()
