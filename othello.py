@@ -198,11 +198,20 @@ class Board:
             print(line)
         print()
 
+    def players_cant_move(self):
+        player1 = True if len(self.valid_moves(1)) == 0 else False
+        player2 = True if len(self.valid_moves(-1)) == 0 else False
+        return player1 and player2
+
     # state is an end game if there are no empty places
     def end(self):
-        return not 0 in self.state
+        return not 0 in self.state or self.players_cant_move()
 
 
+# greedy player
+# one who goes for the win
+# if it can't win, play random
+# it should select a set of moves with the best score, and choose one randomly from it
 def get_greedy_move(board, move_list, turn):
     # go through the moves and score them
     for i in range(len(move_list)):
@@ -228,6 +237,9 @@ def get_greedy_move(board, move_list, turn):
     return move[1]
 
 
+# one depth minimax
+# look at all my moves, then all opponents, no further
+#  behavior?  go for the win.  if no win, will block opponent
 def get_mini_max_move(board, move_list, turn):
     # go through all the moves to score them
     for i in range(len(move_list)):
@@ -246,8 +258,11 @@ def get_mini_max_move(board, move_list, turn):
                 for j in range(len(countermoves)):
                     # put the score at front of move so I can sort
                     board_with_move = board.copy()
-                    board_with_move.place(countermoves[j][0], countermoves[j][1], turn)
-                    countermoves[j] = (board.calculate_score(turn), countermoves[j])
+                    board_with_move.place(countermoves[j][0], board.other_player(turn))
+                    countermoves[j] = (
+                        board.calculate_score(board.other_player(turn)),
+                        countermoves[j],
+                    )
                 # rank them: but this time with the min first
                 countermoves.sort(reverse=False)
                 # get the score of the lowest move
@@ -269,120 +284,11 @@ def get_mini_max_move(board, move_list, turn):
     return move[1]  # cut off the score and just return move
 
 
-# this plays a game between two players that will play completely randomly
-def game():
-    # make the starting board
-    board = Board()
-    # start with player 1
-    turn = 1
-    while True:
-        # get the moves
-        move_list = board.valid_moves(turn)
-        # no moves, skip the turn
-        if len(move_list) == 0:
-            turn = -turn
-            continue
-        # pick a move totally at random
-        i = random.randint(0, len(move_list) - 1)
-        # make a new board
-        board = board.copy()
-        # make the move
-        board.place(move_list[i][0], move_list[i][1], turn)
-        # swap players
-        turn = -turn
-        # print
-        board.print_board()
-        # wait for user to press a key
-        input()
-        # game over? stop.
-        if board.end():
-            break
-    print("Score is", board.evaluate())
-
-
-# greedy player
-# one who goes for the win
-# if it can't win, play random
-# it should select a set of moves with the best score, and choose one randomly from it
-def greedy():
-    # make the starting board
-    board = Board()
-    # start with player 1
-    turn = 1
-    while True:
-        # get the moves
-        move_list = board.valid_moves(turn)
-        # no moves, skip the turn
-        if len(move_list) == 0:
-            turn = -turn
-            continue
-        # use greedy algorithm to choose a move
-        move = get_greedy_move(board, move_list, turn)[1]
-        # make a new board
-        board = board.copy()
-        # make the move
-        board.place(move[0], move[1], turn)
-        # swap players
-        turn = -turn
-        # print
-        board.print_board()
-        # wait for user to press a key
-        # input()
-        # game over? stop.
-        if board.end():
-            break
-    # print("Score is", board.evaluate())
-    winner, score_x, score_o = board.win()
-    print("X score is", score_x)
-    print("O score is", score_o)
-
-
-# one depth minimax
-# look at all my moves, then all opponents, no further
-#  behavior?  go for the win.  if no win, will block opponent
-def mini_max():
-    depth = int(input("Enter the search depth: "))
-
-    if depth == 1:
-        # make the starting board
-        board = Board()
-        # start with player 1
-        turn = 1
-        while True:
-            # get the moves
-            move_list = board.valid_moves(turn)
-            # no moves, skip the turn
-            if len(move_list) == 0:
-                turn = -turn
-                continue
-            # use greedy algorithm to choose a move
-            move = get_mini_max_move(board, move_list, turn)[1]
-            # make a new board
-            board = board.copy()
-            # make the move
-            board.place(move[0], move[1], turn)
-            # swap players
-            turn = -turn
-            # print
-            board.print_board()
-            # wait for user to press a key
-            # input()
-            # game over? stop.
-            if board.end():
-                break
-        # print("Score is", board.evaluate())
-        winner, score_x, score_o = board.win()
-        print("X score is", score_x)
-        print("O score is", score_o)
-    else:
-        print("Invalid depth!")
-
-
 def run_game(ai_type: AI):
     # if ai type in minimax, ask the user for the depth
     depth = 1
-    if ai_type == AI.MINIMAX:
-        depth = int(input("Enter the search depth: "))
+    # if ai_type == AI.MINIMAX:
+    #     depth = int(input("Enter the search depth: "))
 
     # make the starting board
     board = Board()
@@ -393,6 +299,8 @@ def run_game(ai_type: AI):
         move_list = board.valid_moves(turn)
         # no moves, skip the turn
         if len(move_list) == 0:
+            if board.end():
+                break
             turn = -turn
             continue
 
@@ -411,10 +319,12 @@ def run_game(ai_type: AI):
         board = board.copy()
         # make the move
         board.place(move[0], move[1], turn)
+        print("\nTurn:", "X" if turn == 1 else "O")
         # swap players
         turn = -turn
         # print
         board.print_board()
+        # print("Board State:", board.state)
         # wait for user to press a key
         # input()
         # game over? stop.
@@ -427,7 +337,6 @@ def run_game(ai_type: AI):
 
 
 def dummy():
-
     board = Board()
     # board.print_coordinate(9, 9)
 
@@ -566,9 +475,119 @@ def dummy():
     print("BEST MOVE >>", best_move)  ## (4, 9)
 
 
+def fix_mini_max():
+    board = Board()
+
+    board.state = [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
+
+    print(board.valid_moves(-1))
+
+
 if __name__ == "__main__":
     # game()
     # greedy()
     # min_max()
-    run_game(AI.GREEDY)
+    run_game(AI.MINIMAX)
     # dummy()
+    # fix_mini_max()
