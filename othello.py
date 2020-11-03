@@ -220,7 +220,7 @@ def get_greedy_move(board, move_list, turn):
         move_list[i] = (value, move_list[i])
 
     # now I can sort them, biggest value first
-    move_list.sort(reverse=True)
+    move_list.sort(reverse=True, key=lambda x: x[0])
 
     # get a sublist of all the moves that are best
     index = 0
@@ -265,7 +265,7 @@ def get_mini_max_move(board, depth, move_list, turn):
                         countermoves[j],
                     )
                 # rank them: but this time with the min first
-                countermoves.sort(reverse=False)
+                countermoves.sort(reverse=False, key=lambda x: x[0])
                 # get the score of the lowest move
                 worst_score = countermoves[0][0]
                 # now use that score to value my move
@@ -314,14 +314,17 @@ def run_game(ai_type: AI):
         board = board.copy()
         # make the move
         board.place(move[0], move[1], turn)
+
+        # print whose turn it is
         print("\nTurn:", "X" if turn == 1 else "O")
+
         # swap players
         turn = -turn
         # print
         board.print_board()
         # print("Board State:", board.state)
         # wait for user to press a key
-        # input()
+        input()
     # print("Score is", board.evaluate())
     winner, winner_score, score_x, score_o = board.win()
     print("X score is", score_x)
@@ -580,6 +583,6 @@ if __name__ == "__main__":
     # game()
     # greedy()
     # min_max()
-    run_game(AI.MINIMAX)
+    run_game(AI.GREEDY)
     # dummy()
     # fix_mini_max()
