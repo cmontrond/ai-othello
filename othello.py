@@ -308,11 +308,7 @@ def run_game(ai_type: AI):
         if ai_type == AI.GREEDY:
             move = get_greedy_move(board, move_list, turn)
         elif ai_type == AI.MINIMAX:
-            move = (
-                get_mini_max_move(board, depth, move_list, turn)
-                if turn == 1
-                else random.choice(move_list)
-            )
+            move = get_mini_max_move(board, depth, move_list, turn)
 
         # make a new board
         board = board.copy()
