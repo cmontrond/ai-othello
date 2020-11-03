@@ -323,9 +323,6 @@ def run_game(ai_type: AI):
         # print("Board State:", board.state)
         # wait for user to press a key
         # input()
-        # game over? stop.
-        if board.end():
-            break
     # print("Score is", board.evaluate())
     winner, winner_score, score_x, score_o = board.win()
     print("X score is", score_x)
