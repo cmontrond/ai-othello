@@ -198,14 +198,11 @@ class Board:
             print(line)
         print()
 
-    def players_cant_move(self):
-        player1 = True if len(self.valid_moves(1)) == 0 else False
-        player2 = True if len(self.valid_moves(-1)) == 0 else False
-        return player1 and player2
-
     # state is an end game if there are no empty places
     def end(self):
-        return not 0 in self.state or self.players_cant_move()
+        if len(self.valid_moves(1)) == 0 and len(self.valid_moves(-1)) == 0:
+            return True
+        return not 0 in self.state
 
 
 # greedy player
@@ -240,14 +237,14 @@ def get_greedy_move(board, move_list, turn):
 # one depth minimax
 # look at all my moves, then all opponents, no further
 #  behavior?  go for the win.  if no win, will block opponent
-def get_mini_max_move(board, move_list, turn):
+def get_mini_max_move(board, depth, move_list, turn):
     # go through all the moves to score them
     for i in range(len(move_list)):
         board_with_move = board.copy()
         board_with_move.place(move_list[i][0], move_list[i][1], turn)
         value = board_with_move.calculate_score(turn)
         # end game? don't go further, use the score
-        if value != 0:
+        if board_with_move.end():
             move_list[i] = (value, move_list[i])
         else:
             # need to look at opponent
@@ -260,7 +257,8 @@ def get_mini_max_move(board, move_list, turn):
                     board_with_move = board.copy()
                     board_with_move.place(countermoves[j][0], board.other_player(turn))
                     countermoves[j] = (
-                        board.calculate_score(board.other_player(turn)),
+                        # board.calculate_score(board.other_player(turn)),
+                        board.calculate_score(turn),
                         countermoves[j],
                     )
                 # rank them: but this time with the min first
@@ -287,20 +285,18 @@ def get_mini_max_move(board, move_list, turn):
 def run_game(ai_type: AI):
     # if ai type in minimax, ask the user for the depth
     depth = 1
-    # if ai_type == AI.MINIMAX:
-    #     depth = int(input("Enter the search depth: "))
+    if ai_type == AI.MINIMAX:
+        depth = int(input("Enter the search depth: "))
 
     # make the starting board
     board = Board()
     # start with player 1
     turn = 1
-    while True:
+    while not board.end():
         # get the moves
         move_list = board.valid_moves(turn)
         # no moves, skip the turn
         if len(move_list) == 0:
-            if board.end():
-                break
             turn = -turn
             continue
 
@@ -310,7 +306,7 @@ def run_game(ai_type: AI):
             move = get_greedy_move(board, move_list, turn)
         elif ai_type == AI.MINIMAX:
             move = (
-                get_mini_max_move(board, move_list, turn)
+                get_mini_max_move(board, depth, move_list, turn)
                 if turn == 1
                 else random.choice(move_list)
             )
