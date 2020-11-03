@@ -169,6 +169,7 @@ class Board:
 
     # print out the board.  1 is X, -1 is O
     def print_board(self):
+        print("  0123456789")
         for y in range(10):
             line = ""
             for x in range(10):
@@ -178,7 +179,7 @@ class Board:
                     line = line + "O"
                 else:
                     line = line + "."
-            print(line)
+            print(y, line)
         print()
         # print(self.state)
         # print()
@@ -255,7 +256,9 @@ def get_mini_max_move(board, depth, move_list, turn):
                 for j in range(len(countermoves)):
                     # put the score at front of move so I can sort
                     board_with_move = board.copy()
-                    board_with_move.place(countermoves[j][0], board.other_player(turn))
+                    board_with_move.place(
+                        countermoves[j][0], countermoves[j][1], board.other_player(turn)
+                    )
                     countermoves[j] = (
                         # board.calculate_score(board.other_player(turn)),
                         board.calculate_score(turn),
