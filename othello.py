@@ -2,12 +2,6 @@ import random
 from enum import Enum
 
 
-class AI(Enum):
-    RANDOM = 1
-    GREEDY = 2
-    MINIMAX = 3
-
-
 class Optimization(Enum):
     ALPHA_BETA = 1  # Alpha-Beta pruning, allowing for deeper searches
     HEURISTIC = 2  # A better evaluation heuristic
@@ -66,15 +60,9 @@ class Board:
 
     # score gives a value to the board from the point of view of the player
     def score(self, player):
-        winner, winner_score, score_x, score_o = self.win()
-        if winner == player:
-            return winner_score * 10
-        if winner == self.other_player(player):
-            return winner_score * -10
-        if winner == "-":
-            return winner_score * -5
-        # game ongoing? score 0
-        return 0
+        player_score = self.calculate_score(player)
+        other_player_score = self.calculate_score(self.other_player(player))
+        return player_score - other_player_score
 
     # returns a new board that is a copy of the current board
     def copy(self):
@@ -210,12 +198,12 @@ class Board:
 # one who goes for the win
 # if it can't win, play random
 # it should select a set of moves with the best score, and choose one randomly from it
-def get_greedy_move(board, move_list, turn):
+def get_greedy_move(original_board, move_list, turn):
     # go through the moves and score them
     for i in range(len(move_list)):
-        board_with_move = board.copy()
-        board_with_move.place(move_list[i][0], move_list[i][1], turn)
-        value = board_with_move.calculate_score(turn)
+        board = original_board.copy()
+        board.place(move_list[i][0], move_list[i][1], turn)
+        value = board.score(turn)
         # put the score as a tuple in front of the move
         move_list[i] = (value, move_list[i])
 
@@ -236,16 +224,16 @@ def get_greedy_move(board, move_list, turn):
 
 
 # one depth minimax
-# look at all my moves, then all opponents, no further
+# look at all my moves, then all opponents
 #  behavior?  go for the win.  if no win, will block opponent
-def get_mini_max_move(board, depth, move_list, turn):
+def get_mini_max_move(original_board, move_list, turn, depth=1):
     # go through all the moves to score them
     for i in range(len(move_list)):
-        board_with_move = board.copy()
-        board_with_move.place(move_list[i][0], move_list[i][1], turn)
-        value = board_with_move.calculate_score(turn)
+        board = original_board.copy()
+        board.place(move_list[i][0], move_list[i][1], turn)
+        value = board.score(turn)
         # end game? don't go further, use the score
-        if board_with_move.end():
+        if board.end():
             move_list[i] = (value, move_list[i])
         else:
             # need to look at opponent
@@ -255,13 +243,14 @@ def get_mini_max_move(board, depth, move_list, turn):
                 # score them
                 for j in range(len(countermoves)):
                     # put the score at front of move so I can sort
-                    board_with_move = board.copy()
-                    board_with_move.place(
-                        countermoves[j][0], countermoves[j][1], board.other_player(turn)
+                    new_board = board.copy()
+                    new_board.place(
+                        countermoves[j][0],
+                        countermoves[j][1],
+                        new_board.other_player(turn),
                     )
                     countermoves[j] = (
-                        # board.calculate_score(board.other_player(turn)),
-                        board.calculate_score(turn),
+                        new_board.score(turn),
                         countermoves[j],
                     )
                 # rank them: but this time with the min first
@@ -272,7 +261,7 @@ def get_mini_max_move(board, depth, move_list, turn):
                 move_list[i] = (worst_score, move_list[i])
 
     # now pick the best of the worst
-    move_list.sort(reverse=True)
+    move_list.sort(reverse=True, key=lambda x: x[0])
     # get a sublist of all the moves that are best
     index = 0
     top_score = move_list[0][0]
@@ -285,10 +274,24 @@ def get_mini_max_move(board, depth, move_list, turn):
     return move[1]  # cut off the score and just return move
 
 
-def run_game(ai_type: AI):
+def get_human_move(movelist):
+    choice = (-1, -1)
+
+    while choice not in movelist:
+        print("\nChoose one of the following moves:")
+        print(movelist)
+        user_input = input("\nChoice >> ")
+        choice = (int(user_input.split()[0]), int(user_input.split()[1]))
+        if choice not in movelist:
+            print("\nInvalid move!")
+
+    return choice
+
+
+def run_game(user_inputs=False):
     # if ai type in minimax, ask the user for the depth
     depth = 1
-    if ai_type == AI.MINIMAX:
+    if user_inputs:
         depth = int(input("Enter the search depth: "))
 
     # make the starting board
@@ -304,11 +307,15 @@ def run_game(ai_type: AI):
             continue
 
         # select an algorithm, defaults to random
-        move = random.choice(move_list)
-        if ai_type == AI.GREEDY:
+        if turn == 1:
+            # move = random.choice(move_list)
             move = get_greedy_move(board, move_list, turn)
-        elif ai_type == AI.MINIMAX:
-            move = get_mini_max_move(board, depth, move_list, turn)
+            # move = get_mini_max_move(board, depth, move_list, turn)
+        else:
+            # move = get_greedy_move(board, move_list, turn)
+            # move = get_mini_max_move(board, depth, move_list, turn)
+            move = random.choice(move_list)
+            # move = get_human_move(move_list)
 
         # make a new board
         board = board.copy()
@@ -324,265 +331,12 @@ def run_game(ai_type: AI):
         board.print_board()
         # print("Board State:", board.state)
         # wait for user to press a key
-        input()
+        # input()
     # print("Score is", board.evaluate())
     winner, winner_score, score_x, score_o = board.win()
     print("X score is", score_x)
     print("O score is", score_o)
 
 
-def dummy():
-    board = Board()
-    # board.print_coordinate(9, 9)
-
-    # board.place(4, 6, 1)
-    # board.place(3, 4, -1)
-
-    board.state = [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        1,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        1,
-        -1,
-        -1,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        1,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ]
-
-    board.print_board()
-    print()
-
-    starting_score = board.calculate_score(1)
-    print("Starting Score", starting_score)
-    print()
-
-    print("Total moves", len(board.valid_moves(1)), end="\n\n")
-    count = 1
-    for coord in board.valid_moves(1):
-        print("Move", count)
-        test_board = board.copy()
-        test_board.place(coord[0], coord[1], 1)
-        # board.print_coordinate(coord[0], coord[1])
-        score = test_board.calculate_score(1)
-        test_board.print_board()
-        print()
-        print("Move:", coord)
-        print("Score", score)
-        print("Score Difference", score - starting_score)
-        print()
-        count += 1
-
-    best_move = get_greedy_move(board, board.valid_moves(1), 1)
-
-    print()
-    print("BEST MOVE >>", best_move)  ## (4, 9)
-
-
-def fix_mini_max():
-    board = Board()
-
-    board.state = [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ]
-
-    print(board.valid_moves(-1))
-
-
 if __name__ == "__main__":
-    # game()
-    # greedy()
-    # min_max()
-    run_game(AI.GREEDY)
-    # dummy()
-    # fix_mini_max()
+    run_game()
