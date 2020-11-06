@@ -26,7 +26,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-* Python Installed;
+* Have Python Installed;
 
 ### Running the Project
 

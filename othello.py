@@ -29,24 +29,7 @@ class Board:
                 value = value - 1
         return value
 
-    # win return 1,-1, ' ' (game isn't over), or '-' for tie. it also returns the score
-    def win(self):
-        score_x = 0
-        score_o = 0
-        for i in range(100):
-            if self.state[i] == 1:
-                score_x += 1
-            elif self.state[i] == -1:
-                score_o += 1
-        # if not self.end():
-        #     return " ", score_x, score_x, score_o
-        if score_x > score_o:
-            return 1, score_x, score_x, score_o
-        if score_o > score_x:
-            return -1, score_o, score_x, score_o
-        if score_x == score_o:
-            return "-", score_x, score_x, score_o
-
+    # Calculates the score for a specific player
     def calculate_score(self, player):
         score = 0
         for i in range(100):
@@ -59,6 +42,7 @@ class Board:
         return -turn
 
     # score gives a value to the board from the point of view of the player
+    # this one actually calculates the difference between the player and the opponent
     def score(self, player):
         player_score = self.calculate_score(player)
         other_player_score = self.calculate_score(self.other_player(player))
@@ -226,7 +210,7 @@ def get_greedy_move(original_board, move_list, turn):
 # one depth minimax
 # look at all my moves, then all opponents
 #  behavior?  go for the win.  if no win, will block opponent
-def get_mini_max_move(original_board, move_list, turn, depth=1):
+def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False):
     # go through all the moves to score them
     for i in range(len(move_list)):
         board = original_board.copy()
@@ -329,11 +313,14 @@ def run_game(user_inputs=False):
         turn = -turn
         # print
         board.print_board()
+
         # print("Board State:", board.state)
+
         # wait for user to press a key
         # input()
-    # print("Score is", board.evaluate())
-    winner, winner_score, score_x, score_o = board.win()
+
+    score_x = board.score(1)
+    score_o = board.score(-1)
     print("X score is", score_x)
     print("O score is", score_o)
 
