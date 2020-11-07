@@ -139,6 +139,15 @@ class Board:
                     moves = moves + [(x, y)]
         return moves
 
+    # returns valid moves with associated scores
+    def scored_valid_moves(self, id, score_for=1):
+        moves = self.valid_moves(id)
+        for i, move in enumerate(moves):
+            board = self.copy()
+            board.place(move[0], move[1], id)
+            moves[i] = (board.score(score_for), move)
+        return moves
+
     # print out the board.  1 is X, -1 is O
     def print_board(self):
         print("  0123456789")
@@ -204,6 +213,8 @@ def get_greedy_move(original_board, move_list, turn):
     # move_list now contains only my best moves (however many there are)
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
+    if turn == 1:
+        print("X's minimax moves:", move_list)
     return move[1]
 
 
@@ -213,6 +224,8 @@ def get_greedy_move(original_board, move_list, turn):
 def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False):
     # go through all the moves to score them
     for i in range(len(move_list)):
+        # TODO: check if second position of move is a tuple, if so, the move is the second element
+        # TODO: Else, do as you were doing before
         board = original_board.copy()
         board.place(move_list[i][0], move_list[i][1], turn)
         value = board.score(turn)
@@ -237,6 +250,9 @@ def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False)
                         new_board.score(turn),
                         countermoves[j],
                     )
+                    # TODO: Here is where you should call the same function recursively...?
+                    # TODO: Have a global variable that you use to track how many times the function was called
+                    # TODO: This way, you can see if the depth is working
                 # rank them: but this time with the min first
                 countermoves.sort(reverse=False, key=lambda x: x[0])
                 # get the score of the lowest move
@@ -255,6 +271,8 @@ def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False)
     # moves now contains only my best moves (however many there are)
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
+    if turn == 1:
+        print("X's minimax moves:", move_list)
     return move[1]  # cut off the score and just return move
 
 
@@ -270,6 +288,137 @@ def get_human_move(movelist):
             print("\nInvalid move!")
 
     return choice
+
+
+def fix_mini_max():
+
+    board = Board()
+
+    board.state = [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
+
+    board.print_board()
+
+    print("X's moves:", board.scored_valid_moves(1))
+    # greedy_move = get_greedy_move(board, board.valid_moves(1), 1)
+    # print("X's greedy move", greedy_move)
+
+    minimax_move = get_mini_max_move(board, board.valid_moves(1), 1)
+    print("\nX's minimax move", minimax_move)
+
+    new_board = board.copy()
+    new_board.place(1, 5, 1)
+
+    print()
+    new_board.print_board()
+    print("\nO's scored moves for X's (1,5) move:", new_board.scored_valid_moves(-1))
+
+    new_board = board.copy()
+    new_board.place(8, 2, 1)
+
+    print()
+    new_board.print_board()
+    print("\nO's scored moves for X's (8,2) move:", new_board.scored_valid_moves(-1))
 
 
 def run_game(user_inputs=False):
@@ -293,8 +442,8 @@ def run_game(user_inputs=False):
         # select an algorithm, defaults to random
         if turn == 1:
             # move = random.choice(move_list)
-            move = get_greedy_move(board, move_list, turn)
-            # move = get_mini_max_move(board, depth, move_list, turn)
+            # move = get_greedy_move(board, move_list, turn)
+            move = get_mini_max_move(board, move_list, turn)
         else:
             # move = get_greedy_move(board, move_list, turn)
             # move = get_mini_max_move(board, depth, move_list, turn)
@@ -314,10 +463,10 @@ def run_game(user_inputs=False):
         # print
         board.print_board()
 
-        # print("Board State:", board.state)
+        print("Board State:", board.state)
 
         # wait for user to press a key
-        # input()
+        input()
 
     score_x = board.score(1)
     score_o = board.score(-1)
@@ -326,4 +475,5 @@ def run_game(user_inputs=False):
 
 
 if __name__ == "__main__":
-    run_game()
+    # run_game()
+    fix_mini_max()
