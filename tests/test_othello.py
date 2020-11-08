@@ -114,7 +114,7 @@ def test_get_greedy_move():
     assert best_move == (4, 9)
 
 
-def test_get_minimax_move():
+def test_get_minimax_1d_move():
 
     board = othello.Board()
 
@@ -224,3 +224,115 @@ def test_get_minimax_move():
     best_move = othello.get_mini_max_move_one_depth(board, board.valid_moves(1), 1)
 
     assert best_move in [(1, 5), (8, 2)]
+
+
+def test_get_minimax_nd_move():
+
+    board = othello.Board()
+
+    board.state = [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
+
+    best_move = othello.get_mini_max_move_n_depth(board, board.valid_moves(1), 1, 2)
+
+    assert best_move in [(6, 3), (8, 2)]
