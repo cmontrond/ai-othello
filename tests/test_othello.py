@@ -221,6 +221,6 @@ def test_get_minimax_move():
         0,
     ]
 
-    best_move = othello.get_mini_max_move(board, board.valid_moves(1), 1)
+    best_move = othello.get_mini_max_move_one_depth(board, board.valid_moves(1), 1)
 
     assert best_move in [(1, 5), (8, 2)]

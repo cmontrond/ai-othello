@@ -1,6 +1,8 @@
 import random
 from enum import Enum
 
+mini_max_count = 0
+
 
 class Optimization(Enum):
     ALPHA_BETA = 1  # Alpha-Beta pruning, allowing for deeper searches
@@ -221,11 +223,9 @@ def get_greedy_move(original_board, move_list, turn):
 # one depth minimax
 # look at all my moves, then all opponents
 #  behavior?  go for the win.  if no win, will block opponent
-def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False):
+def get_mini_max_move_one_depth(original_board, move_list, turn):
     # go through all the moves to score them
     for i in range(len(move_list)):
-        # TODO: check if second position of move is a tuple, if so, the move is the second element
-        # TODO: Else, do as you were doing before
         board = original_board.copy()
         board.place(move_list[i][0], move_list[i][1], turn)
         value = board.score(turn)
@@ -250,9 +250,6 @@ def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False)
                         new_board.score(turn),
                         countermoves[j],
                     )
-                    # TODO: Here is where you should call the same function recursively...?
-                    # TODO: Have a global variable that you use to track how many times the function was called
-                    # TODO: This way, you can see if the depth is working
                 # rank them: but this time with the min first
                 countermoves.sort(reverse=False, key=lambda x: x[0])
                 # get the score of the lowest move
@@ -276,6 +273,166 @@ def get_mini_max_move(original_board, move_list, turn, depth=1, top_level=False)
     return move[1]  # cut off the score and just return move
 
 
+def get_mini_max_move_n_depth(
+    original_board, move_list, turn, depth=-1, top_level=True
+):
+    # go through all the moves to score them
+    for i in range(len(move_list)):
+        # TODO: check if second position of move is a tuple, if so, the move is the second element
+        # TODO: Else, do as you were doing before
+        board = original_board.copy()
+        board.place(move_list[i][0], move_list[i][1], turn)
+        value = board.score(turn)
+        # end game? don't go further, use the score
+        if board.end():
+            move_list[i] = (value, move_list[i])
+        else:
+            # need to look at opponent
+            # get a list of all countermoves
+            countermoves = board.valid_moves(board.other_player(turn))
+            if len(countermoves) > 0:
+                # score them
+                for j in range(len(countermoves)):
+                    # put the score at front of move so I can sort
+                    new_board = board.copy()
+                    new_board.place(
+                        countermoves[j][0],
+                        countermoves[j][1],
+                        new_board.other_player(turn),
+                    )
+                    value = new_board.score(turn)
+                    # TODO: Here is where you should call the same function recursively...?
+                    # TODO: Have a global variable that you use to track how many times the function was called
+                    # TODO: This way, you can see if the depth is working
+                    if new_board.end():
+                        countermoves[j] = (value, countermoves[j])
+                    elif depth == 1:
+                        countermoves[j] = (value, countermoves[j])
+                    else:
+                        value = get_mini_max_move_n_depth(
+                            new_board,
+                            new_board.valid_moves(turn),
+                            turn,
+                            depth=depth - 1,
+                            top_level=False,
+                        )
+                        countermoves[j] = (value, countermoves[j])
+
+                # rank them: but this time with the min first
+                countermoves.sort(reverse=False, key=lambda x: x[0])
+                # get the score of the lowest move
+                worst_score = countermoves[0][0]
+                # now use that score to value my move
+                move_list[i] = (worst_score, move_list[i])
+                # print(
+                #     "X's move",
+                #     move_list[i][1],
+                #     "counter moves are",
+                #     [cm[1] for cm in countermoves],
+                # )
+
+    # now pick the best of the worst
+    move_list.sort(reverse=True, key=lambda x: x[0])
+
+    if not top_level:
+        return move_list[0][0]
+
+    # get a sublist of all the moves that are best
+    index = 0
+    top_score = move_list[0][0]
+    while index < len(move_list) and move_list[index][0] == top_score:
+        index = index + 1
+    move_list = move_list[:index]
+
+    # moves now contains only my best moves (however many there are)
+    # pick one randomly and return
+    move = move_list[random.randrange(0, len(move_list))]
+
+    # if turn == 1:
+    #     print("X's minimax moves:", move_list)
+    return move[1]  # cut off the score and just return move
+
+
+def get_mini_max_move_n_depth_pruning(
+    original_board, move_list, turn, depth=-1, top_level=True, alpha=-10000, beta=10000
+):
+    # go through all the moves to score them
+    for i in range(len(move_list)):
+        # TODO: check if second position of move is a tuple, if so, the move is the second element
+        # TODO: Else, do as you were doing before
+        board = original_board.copy()
+        board.place(move_list[i][0], move_list[i][1], turn)
+        value = board.score(turn)
+        # end game? don't go further, use the score
+        if board.end():
+            move_list[i] = (value, move_list[i])
+        else:
+            # need to look at opponent
+            # get a list of all countermoves
+            countermoves = board.valid_moves(board.other_player(turn))
+            if len(countermoves) > 0:
+                # score them
+                for j in range(len(countermoves)):
+                    # put the score at front of move so I can sort
+                    new_board = board.copy()
+                    new_board.place(
+                        countermoves[j][0],
+                        countermoves[j][1],
+                        new_board.other_player(turn),
+                    )
+                    value = new_board.score(turn)
+                    # TODO: Here is where you should call the same function recursively...?
+                    # TODO: Have a global variable that you use to track how many times the function was called
+                    # TODO: This way, you can see if the depth is working
+                    if new_board.end():
+                        countermoves[j] = (value, countermoves[j])
+                    elif depth == 1:
+                        countermoves[j] = (value, countermoves[j])
+                    else:
+                        value = get_mini_max_move_n_depth(
+                            new_board,
+                            new_board.valid_moves(turn),
+                            turn,
+                            depth=depth - 1,
+                            top_level=False,
+                        )
+                        countermoves[j] = (value, countermoves[j])
+
+                # rank them: but this time with the min first
+                countermoves.sort(reverse=False, key=lambda x: x[0])
+                # get the score of the lowest move
+                worst_score = countermoves[0][0]
+                # now use that score to value my move
+                move_list[i] = (worst_score, move_list[i])
+                # print(
+                #     "X's move",
+                #     move_list[i][1],
+                #     "counter moves are",
+                #     [cm[1] for cm in countermoves],
+                # )
+
+    # now pick the best of the worst
+    move_list.sort(reverse=True, key=lambda x: x[0])
+
+    if not top_level:
+        return move_list[0][0]
+
+    # get a sublist of all the moves that are best
+    index = 0
+    top_score = move_list[0][0]
+    while index < len(move_list) and move_list[index][0] == top_score:
+        index = index + 1
+    move_list = move_list[:index]
+
+    # moves now contains only my best moves (however many there are)
+    # pick one randomly and return
+    move = move_list[random.randrange(0, len(move_list))]
+
+    # if turn == 1:
+    #     print("X's minimax moves:", move_list)
+    return move[1]  # cut off the score and just return move
+
+
 def get_human_move(movelist):
     choice = (-1, -1)
 
@@ -294,108 +451,108 @@ def fix_mini_max():
 
     board = Board()
 
-    board.state = [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        -1,
-        -1,
-        -1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ]
+    # board.state = [
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     -1,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     1,
+    #     1,
+    #     -1,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     -1,
+    #     -1,
+    #     -1,
+    #     -1,
+    #     1,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     1,
+    #     1,
+    #     1,
+    #     1,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     1,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    #     0,
+    # ]
 
     board.print_board()
 
@@ -403,22 +560,27 @@ def fix_mini_max():
     # greedy_move = get_greedy_move(board, board.valid_moves(1), 1)
     # print("X's greedy move", greedy_move)
 
-    minimax_move = get_mini_max_move(board, board.valid_moves(1), 1)
+    # minimax_move = get_mini_max_move_one_depth(board, board.valid_moves(1), 1)
+    minimax_move = get_mini_max_move_n_depth(
+        board, board.valid_moves(1), turn=1, depth=2, top_level=True
+    )
     print("\nX's minimax move", minimax_move)
+    #
+    # new_board = board.copy()
+    # new_board.place(1, 5, 1)
 
-    new_board = board.copy()
-    new_board.place(1, 5, 1)
+    # print()
+    # new_board.print_board()
+    # print("\nO's scored moves for X's (1,5) move:", new_board.scored_valid_moves(-1))
 
-    print()
-    new_board.print_board()
-    print("\nO's scored moves for X's (1,5) move:", new_board.scored_valid_moves(-1))
+    # new_board = board.copy()
+    # new_board.place(8, 2, 1)
 
-    new_board = board.copy()
-    new_board.place(8, 2, 1)
+    # print()
+    # new_board.print_board()
+    # print("\nO's scored moves for X's (8,2) move:", new_board.scored_valid_moves(-1))
 
-    print()
-    new_board.print_board()
-    print("\nO's scored moves for X's (8,2) move:", new_board.scored_valid_moves(-1))
+    # print("Minimax Count:", mini_max_count)
 
 
 def run_game(user_inputs=False):
@@ -443,7 +605,8 @@ def run_game(user_inputs=False):
         if turn == 1:
             # move = random.choice(move_list)
             # move = get_greedy_move(board, move_list, turn)
-            move = get_mini_max_move(board, move_list, turn)
+            # move = get_mini_max_move_one_depth(board, move_list, turn)
+            move = get_mini_max_move_n_depth(board, move_list, turn, 2)
         else:
             # move = get_greedy_move(board, move_list, turn)
             # move = get_mini_max_move(board, depth, move_list, turn)
@@ -463,10 +626,10 @@ def run_game(user_inputs=False):
         # print
         board.print_board()
 
-        print("Board State:", board.state)
+        # print("Board State:", board.state)
 
         # wait for user to press a key
-        input()
+        # input()
 
     score_x = board.score(1)
     score_o = board.score(-1)
@@ -475,5 +638,5 @@ def run_game(user_inputs=False):
 
 
 if __name__ == "__main__":
-    # run_game()
-    fix_mini_max()
+    run_game()
+    # fix_mini_max()
