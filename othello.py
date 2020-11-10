@@ -165,7 +165,21 @@ class Board:
     def heuristic_coin_parity(self, player):
         player_score = self.calculate_score(player)
         opponent_score = self.calculate_score(self.other_player(player))
-        return 100 * (player_score - opponent_score) // (player_score + opponent_score)
+        return 100 * (player_score - opponent_score) / (player_score + opponent_score)
+
+    # number of next moves a player has, given the current state of the game
+    def heuristic_mobility(self, player):
+        player_mobility = len(self.valid_moves(player))
+        opponent_mobility = len(self.valid_moves(self.other_player(player)))
+
+        if player_mobility + opponent_mobility != 0:
+            return (
+                100
+                * (player_mobility - opponent_mobility)
+                / (player_mobility + opponent_mobility)
+            )
+        else:
+            return 0
 
     # print out the board.  1 is X, -1 is O
     def print_board(self):
