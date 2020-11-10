@@ -161,6 +161,12 @@ class Board:
             moves[i] = (board.score(score_for), move)
         return moves
 
+    # difference in coins between the max player and min player.
+    def heuristic_coin_parity(self, player):
+        player_score = self.calculate_score(player)
+        opponent_score = self.calculate_score(self.other_player(player))
+        return 100 * (player_score - opponent_score) // (player_score + opponent_score)
+
     # print out the board.  1 is X, -1 is O
     def print_board(self):
         print("  0123456789")
