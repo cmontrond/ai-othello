@@ -181,6 +181,10 @@ class Board:
         else:
             return 0
 
+    # sums up the different heuristic functions
+    def calculate_heuristic(self, player):
+        return self.heuristic_coin_parity(player) + self.heuristic_mobility(player)
+
     # print out the board.  1 is X, -1 is O
     def print_board(self):
         print("  0123456789")
