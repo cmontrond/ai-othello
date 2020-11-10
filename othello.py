@@ -466,6 +466,103 @@ def get_mini_max_move_n_depth_pruning(
     return move[1]  # cut off the score and just return move
 
 
+# here, we actually implement an heuristic to improve our minimax algorithm
+def get_mini_max_move_n_depth_pruning_heuristic(
+    original_board, turn, depth=-1, top_level=True, alpha=-10000, beta=10000
+):
+    move_list = original_board.valid_moves(turn)
+    # go through all the moves to score them
+    for i in range(len(move_list)):
+        board = original_board.copy()
+        board.place(move_list[i][0], move_list[i][1], turn)
+        value = board.score(turn)
+        # end game? don't go further, use the score
+        if board.end():
+            move_list[i] = (value, move_list[i])
+        else:
+            alpha = max([alpha, value])
+
+            if beta <= alpha:
+                move_list[i] = (alpha, move_list[i])
+                # move_list = move_list[: i + 1]
+                break
+
+            # need to look at opponent
+            # get a list of all countermoves
+            countermoves = board.valid_moves(board.other_player(turn))
+            if len(countermoves) > 0:
+                # score them
+                for j in range(len(countermoves)):
+                    # put the score at front of move so I can sort
+                    new_board = board.copy()
+                    new_board.place(
+                        countermoves[j][0],
+                        countermoves[j][1],
+                        new_board.other_player(turn),
+                    )
+                    value = new_board.score(turn)
+                    if new_board.end():
+                        countermoves[j] = (value, countermoves[j])
+                    elif depth == 1:
+                        countermoves[j] = (value, countermoves[j])
+                    else:
+                        helper = len(new_board.valid_moves(turn))
+                        if helper > 0:
+                            value = get_mini_max_move_n_depth_pruning_heuristic(
+                                new_board,
+                                turn,
+                                depth=depth - 1,
+                                top_level=False,
+                                alpha=alpha,
+                                beta=beta,
+                            )
+                            countermoves[j] = (value, countermoves[j])
+                        else:
+                            countermoves[j] = (value, countermoves[j])
+
+                    beta = min([beta, value])
+                    if beta <= alpha:
+                        move_list[i] = (beta, move_list[i])
+                        # move_list = move_list[: i + 1]
+                        break
+
+                # rank them: but this time with the min first
+                countermoves.sort(reverse=False, key=lambda x: x[0])
+                # get the score of the lowest move
+                worst_score = countermoves[0][0]
+
+                # now use that score to value my move
+                if type(move_list[i][1]) == tuple:
+                    move_list[i] = (worst_score, move_list[i][1])
+                else:
+                    move_list[i] = (worst_score, move_list[i])
+            else:
+                move_list[i] = (value, move_list[i])
+
+    # now pick the best of the worst
+    move_list = [(m[0], m[1]) for m in move_list if (type(m[1]) == tuple)]
+
+    move_list.sort(reverse=True, key=lambda x: x[0])
+
+    if not top_level:
+        return move_list[0][0]
+
+    # get a sublist of all the moves that are best
+    index = 0
+    top_score = move_list[0][0]
+    while index < len(move_list) and move_list[index][0] == top_score:
+        index = index + 1
+    move_list = move_list[:index]
+
+    # moves now contains only my best moves (however many there are)
+    # pick one randomly and return
+    move = move_list[random.randrange(0, len(move_list))]
+
+    # if turn == 1:
+    #     print("X's minimax moves:", move_list)
+    return move[1]  # cut off the score and just return move
+
+
 def get_human_move(movelist):
     choice = (-1, -1)
 
