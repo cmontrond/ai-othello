@@ -24,24 +24,4 @@ Run the project:
 
 ```
 python othello.py
-```
-
-### Testing the Project
-
-To run a game where two players play randomly against each other:
-
-```
-Do this
-```
-
-To run a game where two AI's play using a greedy approach:
-
-```
-Do this
-```
-
-To run a game where two AI's play using the mini-max algorithm:
-
-```
-Do this
-```
+```s
