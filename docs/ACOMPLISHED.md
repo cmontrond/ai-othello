@@ -3,5 +3,5 @@
 * Two AIs, where both AIs use minimax to a depth of 1 ✔
 * Two AIs, where both AIs use minimax to a user-specified depth ✔
 * Alpha-Beta pruning, allowing for deeper searches ✔
-* A better evaluation heuristic ❌
+* A better evaluation heuristic ✔
 * Pruning of previously seen board states ❌
