@@ -55,10 +55,6 @@ Testing using Pytest:
 python -m pytest tests
 ```
 
-## References
-* [How to Play Othello or Reversi](https://www.youtube.com/watch?v=Ol3Id7xYsY4)
-* [An Analysis of Heuristics in Othello](https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf)
-
 ## What Was Successfully Accomplished
 * Two AIs, where both AIs use a “greedy strategy”.  In a greedy strategy, the AI will consider all moves and take the best one, but will not search deeper ✔
 * Two AIs, where both AIs use minimax to a depth of 1 ✔
@@ -66,6 +62,10 @@ python -m pytest tests
 * Alpha-Beta pruning, allowing for deeper searches ✔
 * A better evaluation heuristic ✔
 * Pruning of previously seen board states ❌
+
+## References
+* [How to Play Othello or Reversi](https://www.youtube.com/watch?v=Ol3Id7xYsY4)
+* [An Analysis of Heuristics in Othello](https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf)
 
 ## Built With
 
