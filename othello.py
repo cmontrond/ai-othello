@@ -1,8 +1,6 @@
 import random
 from enum import Enum
 
-mini_max_count = 0
-
 
 class Optimization(Enum):
     ALPHA_BETA = 1  # Alpha-Beta pruning, allowing for deeper searches
@@ -250,8 +248,6 @@ def get_greedy_move(original_board, move_list, turn):
     # move_list now contains only my best moves (however many there are)
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
-    if turn == 1:
-        print("X's minimax moves:", move_list)
     return move[1]
 
 
@@ -303,18 +299,16 @@ def get_mini_max_move_one_depth(original_board, move_list, turn):
     # moves now contains only my best moves (however many there are)
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
-    if turn == 1:
-        print("X's minimax moves:", move_list)
     return move[1]  # cut off the score and just return move
 
 
+# n depth minimax
+# look at all my moves, then all opponents, then do recursive call to this same function
 def get_mini_max_move_n_depth(
     original_board, move_list, turn, depth=-1, top_level=True
 ):
     # go through all the moves to score them
     for i in range(len(move_list)):
-        # TODO: check if second position of move is a tuple, if so, the move is the second element
-        # TODO: Else, do as you were doing before
         board = original_board.copy()
         board.place(move_list[i][0], move_list[i][1], turn)
         value = board.score(turn)
@@ -336,9 +330,6 @@ def get_mini_max_move_n_depth(
                         new_board.other_player(turn),
                     )
                     value = new_board.score(turn)
-                    # TODO: Here is where you should call the same function recursively...?
-                    # TODO: Have a global variable that you use to track how many times the function was called
-                    # TODO: This way, you can see if the depth is working
                     if new_board.end():
                         countermoves[j] = (value, countermoves[j])
                     elif depth == 1:
@@ -383,11 +374,11 @@ def get_mini_max_move_n_depth(
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
 
-    if turn == 1:
-        print("X's minimax moves:", move_list)
     return move[1]  # cut off the score and just return move
 
 
+# n depth minimax
+# this one includes pruning. This speeds up our results
 def get_mini_max_move_n_depth_pruning(
     original_board, turn, depth=-1, top_level=True, alpha=-10000, beta=10000
 ):
@@ -405,7 +396,6 @@ def get_mini_max_move_n_depth_pruning(
 
             if beta <= alpha:
                 move_list[i] = (alpha, move_list[i])
-                # move_list = move_list[: i + 1]
                 break
 
             # need to look at opponent
@@ -444,7 +434,6 @@ def get_mini_max_move_n_depth_pruning(
                     beta = min([beta, value])
                     if beta <= alpha:
                         move_list[i] = (beta, move_list[i])
-                        # move_list = move_list[: i + 1]
                         break
 
                 # rank them: but this time with the min first
@@ -457,12 +446,6 @@ def get_mini_max_move_n_depth_pruning(
                     move_list[i] = (worst_score, move_list[i][1])
                 else:
                     move_list[i] = (worst_score, move_list[i])
-                # print(
-                #     "X's move",
-                #     move_list[i][1],
-                #     "counter moves are",
-                #     [cm[1] for cm in countermoves],
-                # )
             else:
                 move_list[i] = (value, move_list[i])
 
@@ -485,11 +468,10 @@ def get_mini_max_move_n_depth_pruning(
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
 
-    # if turn == 1:
-    #     print("X's minimax moves:", move_list)
     return move[1]  # cut off the score and just return move
 
 
+# n depth minimax
 # here, we actually implement an heuristic to improve our minimax algorithm
 def get_mini_max_move_n_depth_pruning_heuristic(
     original_board, turn, depth=-1, top_level=True, alpha=-10000, beta=10000
@@ -588,8 +570,6 @@ def get_mini_max_move_n_depth_pruning_heuristic(
     # pick one randomly and return
     move = move_list[random.randrange(0, len(move_list))]
 
-    # if turn == 1:
-    #     print("X's minimax moves:", move_list)
     return move[1]  # cut off the score and just return move
 
 
