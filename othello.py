@@ -627,286 +627,320 @@ def game_type_selection():
 
 # shows optimizations selection
 def optimizations_selection():
-    print("OTHELLO GAME - ARTIFICIAL INTELLIGENCE\n")
-    print("*********************************************************\n")
+    print("\n*********************************************************\n")
     print("0 - Alpha Beta Pruning of Minimax Tree")
-    print("1 - Alpha Beta Pruning of Minimax Tree + Heuristics")
-    print("3 - Exit program\n")
+    print("1 - Alpha Beta Pruning of Minimax Tree + Heuristics\n")
     print("*********************************************************\n")
 
     choice = int(input("Choose an optimization >> "))
 
     if choice == Optimization.ALPHA_BETA.value:
-        return GameType.MANUAL
+        return Optimization.ALPHA_BETA
     elif choice == Optimization.HEURISTIC.value:
-        return GameType.RANDOM
+        return Optimization.HEURISTIC
     else:
-        return GameType.EXIT_GAME
+        exit(0)
 
 
 # the actual game
 def run_game(user_inputs=False):
-    # if ai type in minimax, ask the user for the depth
-    depth = 1
-    if user_inputs:
-        depth = int(input("Enter the search depth: "))
 
-    # make the starting board
-    board = Board()
-    # board.state = [
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     0,
-    #     0,
-    #     0,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     0,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     0,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     0,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     0,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     0,
-    #     -1,
-    #     1,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     0,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     0,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     0,
-    #     0,
-    # ]
-    # board.state = [
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     -1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     1,
-    #     0,
-    # ]
-    # start with player 1
-    turn = 1
-    while not board.end():
-        # get the moves
-        move_list = board.valid_moves(turn)
-        # no moves, skip the turn
-        if len(move_list) == 0:
+    game_type = game_type_selection()
+
+    if game_type != GameType.EXIT_GAME:
+
+        optimization = ""
+        depth = 1
+
+        if game_type == GameType.MINIMAX_NDEPTH:
+
+            depth = int(input("\n\nEnter the minimax depth >> "))
+            optimization = optimizations_selection()
+
+        # make the starting board
+        board = Board()
+        # board.state = [
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     0,
+        #     0,
+        #     0,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     0,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     0,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     0,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     0,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     0,
+        #     -1,
+        #     1,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     0,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     0,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     0,
+        #     0,
+        # ]
+        # board.state = [
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     -1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     1,
+        #     0,
+        # ]
+        # start with player 1
+        turn = 1
+        while not board.end():
+            # get the moves
+            move_list = board.valid_moves(turn)
+            # no moves, skip the turn
+            if len(move_list) == 0:
+                turn = -turn
+                continue
+
+            # select an algorithm, defaults to random
+            if turn == 1:
+                if game_type == GameType.MANUAL:
+                    # move = random.choice(move_list)
+                    # move = get_greedy_move(board, move_list, turn)
+                    # move = get_mini_max_move_one_depth(board, move_list, turn)
+                    # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
+                    # move = get_mini_max_move_n_depth_pruning(board, turn, 3)
+                    move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
+                elif game_type == GameType.RANDOM:
+                    move = random.choice(move_list)
+                elif game_type == GameType.GREEDY:
+                    move = get_greedy_move(board, move_list, turn)
+                elif game_type == GameType.MINIMAX_1DEPTH:
+                    move = get_mini_max_move_one_depth(board, move_list, turn)
+                elif game_type == GameType.MINIMAX_NDEPTH:
+                    if optimization == Optimization.ALPHA_BETA:
+                        move = get_mini_max_move_n_depth_pruning(board, turn, depth)
+                    elif optimization == Optimization.HEURISTIC:
+                        move = get_mini_max_move_n_depth_pruning_heuristic(
+                            board, turn, depth
+                        )
+            else:
+                if game_type == GameType.MANUAL:
+                    move = random.choice(move_list)
+                    # move = get_greedy_move(board, move_list, turn)
+                    # move = get_mini_max_move_one_depth(board, move_list, turn)
+                    # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
+                    # move = get_human_move(move_list)
+                    # move = get_mini_max_move_n_depth_pruning(board, turn, 1)
+                    # move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
+                elif game_type == GameType.RANDOM:
+                    move = random.choice(move_list)
+                elif game_type == GameType.GREEDY:
+                    move = get_greedy_move(board, move_list, turn)
+                elif game_type == GameType.MINIMAX_1DEPTH:
+                    move = get_mini_max_move_one_depth(board, move_list, turn)
+                elif game_type == GameType.MINIMAX_NDEPTH:
+                    if optimization == Optimization.ALPHA_BETA:
+                        move = get_mini_max_move_n_depth_pruning(board, turn, depth)
+                    elif optimization == Optimization.HEURISTIC:
+                        move = get_mini_max_move_n_depth_pruning_heuristic(
+                            board, turn, depth
+                        )
+
+            # make a new board
+            board = board.copy()
+            # make the move
+            board.place(move[0], move[1], turn)
+
+            # print whose turn it is
+            print("\nTurn:", "X" if turn == 1 else "O")
+
+            # swap players
             turn = -turn
-            continue
+            # print
+            board.print_board()
 
-        # select an algorithm, defaults to random
-        if turn == 1:
-            # move = random.choice(move_list)
-            # move = get_greedy_move(board, move_list, turn)
-            # move = get_mini_max_move_one_depth(board, move_list, turn)
-            # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
-            # move = get_mini_max_move_n_depth_pruning(board, turn, 3)
-            move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
-        else:
-            move = random.choice(move_list)
-            # move = get_greedy_move(board, move_list, turn)
-            # move = get_mini_max_move_one_depth(board, move_list, turn)
-            # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
-            # move = get_human_move(move_list)
-            # move = get_mini_max_move_n_depth_pruning(board, turn, 1)
+            # print("Board State:", board.state)
 
-        # make a new board
-        board = board.copy()
-        # make the move
-        board.place(move[0], move[1], turn)
+            # wait for user to press a key
+            # input()
 
-        # print whose turn it is
-        print("\nTurn:", "X" if turn == 1 else "O")
-
-        # swap players
-        turn = -turn
-        # print
-        board.print_board()
-
-        # print("Board State:", board.state)
-
-        # wait for user to press a key
-        # input()
-
-    score_x = board.calculate_score(1)
-    score_o = board.calculate_score(-1)
-    print("X score is", score_x)
-    print("O score is", score_o)
+        score_x = board.calculate_score(1)
+        score_o = board.calculate_score(-1)
+        print("X score is", score_x)
+        print("O score is", score_o)
 
 
 if __name__ == "__main__":
-    choice = optimizations_selection()
-    print(choice)
+    run_game()
