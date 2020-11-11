@@ -2,10 +2,19 @@ import random
 from enum import Enum
 
 
+class GameType(Enum):
+    MANUAL = 0
+    RANDOM = 1
+    GREEDY = 2
+    MINIMAX_1DEPTH = 3
+    MINIMAX_NDEPTH = 4
+    EXIT_GAME = 5
+
+
 class Optimization(Enum):
-    ALPHA_BETA = 1  # Alpha-Beta pruning, allowing for deeper searches
-    HEURISTIC = 2  # A better evaluation heuristic
-    PRUNING = 3  # Pruning of previously seen board states
+    ALPHA_BETA = 0  # Alpha-Beta pruning, allowing for deeper searches
+    HEURISTIC = 1  # A better evaluation heuristic
+    PRUNING = 4  # Pruning of previously seen board states
 
 
 # this class stores an othello board state
@@ -573,6 +582,7 @@ def get_mini_max_move_n_depth_pruning_heuristic(
     return move[1]  # cut off the score and just return move
 
 
+# gets the move from a human player via keyboard input
 def get_human_move(movelist):
     choice = (-1, -1)
 
@@ -587,142 +597,54 @@ def get_human_move(movelist):
     return choice
 
 
-def fix_mini_max():
+# shows the initial game selection
+def game_type_selection():
+    print("OTHELLO GAME - ARTIFICIAL INTELLIGENCE\n")
+    print("*********************************************************\n")
+    print("0 - Manual")
+    print("1 - Random")
+    print("2 - Greedy")
+    print("3 - Minimax 1 Depth (no optimizations)")
+    print("4 - Minimax N Depth (you can select optimizations)")
+    print("5 - Exit program\n")
+    print("*********************************************************\n")
 
-    board = Board()
+    choice = int(input("Choose a way to plan the game >> "))
 
-    board.state = [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        -1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -1,
-        -1,
-        -1,
-        -1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ]
-
-    board.print_board()
-
-    print("X's moves:", board.scored_valid_moves(1))
-    # greedy_move = get_greedy_move(board, board.valid_moves(1), 1)
-    # print("X's greedy move", greedy_move)
-
-    # minimax_move = get_mini_max_move_one_depth(board, board.valid_moves(1), 1)
-    minimax_move = get_mini_max_move_n_depth(
-        board, board.valid_moves(1), turn=1, depth=2, top_level=True
-    )
-    print("\nX's minimax move", minimax_move)
-    #
-    # new_board = board.copy()
-    # new_board.place(1, 5, 1)
-
-    # print()
-    # new_board.print_board()
-    # print("\nO's scored moves for X's (1,5) move:", new_board.scored_valid_moves(-1))
-
-    # new_board = board.copy()
-    # new_board.place(8, 2, 1)
-
-    # print()
-    # new_board.print_board()
-    # print("\nO's scored moves for X's (8,2) move:", new_board.scored_valid_moves(-1))
-
-    # print("Minimax Count:", mini_max_count)
+    if choice == GameType.MANUAL.value:
+        return GameType.MANUAL
+    elif choice == GameType.RANDOM.value:
+        return GameType.RANDOM
+    elif choice == GameType.GREEDY.value:
+        return GameType.GREEDY
+    elif choice == GameType.MINIMAX_1DEPTH.value:
+        return GameType.MINIMAX_1DEPTH
+    elif choice == GameType.MINIMAX_NDEPTH.value:
+        return GameType.MINIMAX_NDEPTH
+    else:
+        return GameType.EXIT_GAME
 
 
+# shows optimizations selection
+def optimizations_selection():
+    print("OTHELLO GAME - ARTIFICIAL INTELLIGENCE\n")
+    print("*********************************************************\n")
+    print("0 - Alpha Beta Pruning of Minimax Tree")
+    print("1 - Alpha Beta Pruning of Minimax Tree + Heuristics")
+    print("3 - Exit program\n")
+    print("*********************************************************\n")
+
+    choice = int(input("Choose an optimization >> "))
+
+    if choice == Optimization.ALPHA_BETA.value:
+        return GameType.MANUAL
+    elif choice == Optimization.HEURISTIC.value:
+        return GameType.RANDOM
+    else:
+        return GameType.EXIT_GAME
+
+
+# the actual game
 def run_game(user_inputs=False):
     # if ai type in minimax, ask the user for the depth
     depth = 1
@@ -986,5 +908,5 @@ def run_game(user_inputs=False):
 
 
 if __name__ == "__main__":
-    run_game()
-    # fix_mini_max()
+    choice = optimizations_selection()
+    print(choice)
