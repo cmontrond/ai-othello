@@ -183,7 +183,7 @@ class Board:
 
     # sums up the different heuristic functions
     def calculate_heuristic(self, player):
-        return self.heuristic_coin_parity(player) + self.heuristic_mobility(player)
+        return self.heuristic_mobility(player)
 
     # print out the board.  1 is X, -1 is O
     def print_board(self):
@@ -502,13 +502,14 @@ def get_mini_max_move_n_depth_pruning_heuristic(
         value = board.score(turn)
         # end game? don't go further, use the score
         if board.end():
-            move_list[i] = (value, move_list[i])
+            heuristic = board.calculate_heuristic(turn)
+            move_list[i] = (value + heuristic, move_list[i])
         else:
             alpha = max([alpha, value])
 
             if beta <= alpha:
-                move_list[i] = (alpha, move_list[i])
-                # move_list = move_list[: i + 1]
+                heuristic = board.calculate_heuristic(turn)
+                move_list[i] = (alpha + heuristic, move_list[i])
                 break
 
             # need to look at opponent
@@ -526,9 +527,11 @@ def get_mini_max_move_n_depth_pruning_heuristic(
                     )
                     value = new_board.score(turn)
                     if new_board.end():
-                        countermoves[j] = (value, countermoves[j])
+                        heuristic = new_board.calculate_heuristic(turn)
+                        countermoves[j] = (value + heuristic, countermoves[j])
                     elif depth == 1:
-                        countermoves[j] = (value, countermoves[j])
+                        heuristic = new_board.calculate_heuristic(turn)
+                        countermoves[j] = (value + heuristic, countermoves[j])
                     else:
                         helper = len(new_board.valid_moves(turn))
                         if helper > 0:
@@ -540,14 +543,16 @@ def get_mini_max_move_n_depth_pruning_heuristic(
                                 alpha=alpha,
                                 beta=beta,
                             )
-                            countermoves[j] = (value, countermoves[j])
+                            heuristic = new_board.calculate_heuristic(turn)
+                            countermoves[j] = (value + heuristic, countermoves[j])
                         else:
-                            countermoves[j] = (value, countermoves[j])
+                            heuristic = new_board.calculate_heuristic(turn)
+                            countermoves[j] = (value + heuristic, countermoves[j])
 
                     beta = min([beta, value])
                     if beta <= alpha:
-                        move_list[i] = (beta, move_list[i])
-                        # move_list = move_list[: i + 1]
+                        heuristic = new_board.calculate_heuristic(turn)
+                        move_list[i] = (beta + heuristic, move_list[i])
                         break
 
                 # rank them: but this time with the min first
@@ -561,7 +566,8 @@ def get_mini_max_move_n_depth_pruning_heuristic(
                 else:
                     move_list[i] = (worst_score, move_list[i])
             else:
-                move_list[i] = (value, move_list[i])
+                heuristic = board.calculate_heuristic(turn)
+                move_list[i] = (value + heuristic, move_list[i])
 
     # now pick the best of the worst
     move_list = [(m[0], m[1]) for m in move_list if (type(m[1]) == tuple)]
@@ -965,14 +971,15 @@ def run_game(user_inputs=False):
             # move = get_greedy_move(board, move_list, turn)
             # move = get_mini_max_move_one_depth(board, move_list, turn)
             # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
-            move = get_mini_max_move_n_depth_pruning(board, turn, 3)
+            # move = get_mini_max_move_n_depth_pruning(board, turn, 3)
+            move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
         else:
-            # move = random.choice(move_list)
+            move = random.choice(move_list)
             # move = get_greedy_move(board, move_list, turn)
             # move = get_mini_max_move_one_depth(board, move_list, turn)
             # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
             # move = get_human_move(move_list)
-            move = get_mini_max_move_n_depth_pruning(board, turn, 1)
+            # move = get_mini_max_move_n_depth_pruning(board, turn, 1)
 
         # make a new board
         board = board.copy()
