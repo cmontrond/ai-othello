@@ -670,6 +670,8 @@ def run_game(user_inputs=False):
                 turn = -turn
                 continue
 
+            move = random.choice(move_list)
+
             # select an algorithm, defaults to random
             if turn == 1:
                 if game_type == GameType.MANUAL:
@@ -692,6 +694,8 @@ def run_game(user_inputs=False):
                         move = get_mini_max_move_n_depth_pruning_heuristic(
                             board, turn, depth
                         )
+                else:
+                    move = random.choice(move_list)
             else:
                 if game_type == GameType.MANUAL:
                     move = random.choice(move_list)
@@ -714,6 +718,8 @@ def run_game(user_inputs=False):
                         move = get_mini_max_move_n_depth_pruning_heuristic(
                             board, turn, depth
                         )
+                else:
+                    move = random.choice(move_list)
 
             # make a new board
             board = board.copy()
