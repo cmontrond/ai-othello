@@ -24,4 +24,4 @@ Run the project:
 
 ```
 python othello.py
-```s
+```
