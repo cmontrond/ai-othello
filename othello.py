@@ -169,7 +169,7 @@ class Board:
         return moves
 
     # difference in coins between the max player and min player.
-    def heuristic_coin_parity(self, player):
+    def heuristic_token_parity(self, player):
         player_score = self.calculate_score(player)
         opponent_score = self.calculate_score(self.other_player(player))
         return 100 * (player_score - opponent_score) / (player_score + opponent_score)
@@ -190,7 +190,7 @@ class Board:
 
     # sums up the different heuristic functions
     def calculate_heuristic(self, player):
-        return self.heuristic_mobility(player) + self.heuristic_coin_parity(player)
+        return self.heuristic_mobility(player) + self.heuristic_token_parity(player)
 
     # print out the board.  1 is X, -1 is O
     def print_board(self):

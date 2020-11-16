@@ -25,3 +25,9 @@ Run the project:
 ```
 python othello.py
 ```
+
+Testing using Pytest:
+
+```
+python -m pytest tests
+```
