@@ -643,7 +643,7 @@ def optimizations_selection():
 
 
 # the actual game
-def run_game(user_inputs=False):
+def run_game():
 
     game_type = game_type_selection()
 
