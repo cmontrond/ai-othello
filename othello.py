@@ -190,7 +190,7 @@ class Board:
 
     # sums up the different heuristic functions
     def calculate_heuristic(self, player):
-        return self.heuristic_mobility(player)
+        return self.heuristic_mobility(player) + self.heuristic_coin_parity(player)
 
     # print out the board.  1 is X, -1 is O
     def print_board(self):
