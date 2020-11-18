@@ -17,9 +17,6 @@ class Optimization(Enum):
     PRUNING = 4  # Pruning of previously seen board states
 
 
-seen_boards = []
-
-
 # this class stores an othello board state
 # the state is handled as a 1d list that stores a 10x10 board.  1 and -1 are the two colors, 0 are empty squares
 class Board:
