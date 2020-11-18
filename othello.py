@@ -17,6 +17,9 @@ class Optimization(Enum):
     PRUNING = 4  # Pruning of previously seen board states
 
 
+seen_boards = []
+
+
 # this class stores an othello board state
 # the state is handled as a 1d list that stores a 10x10 board.  1 and -1 are the two colors, 0 are empty squares
 class Board:
@@ -191,6 +194,13 @@ class Board:
     # sums up the different heuristic functions
     def calculate_heuristic(self, player):
         return self.heuristic_mobility(player) + self.heuristic_token_parity(player)
+
+    # get a board id using the board state
+    def get_board_id(self):
+        id = ""
+        for (value, index) in enumerate(self.state):
+            id += f"{value}:{index}"
+        return id
 
     # print out the board.  1 is X, -1 is O
     def print_board(self):
@@ -679,8 +689,8 @@ def run_game():
                     # move = get_greedy_move(board, move_list, turn)
                     # move = get_mini_max_move_one_depth(board, move_list, turn)
                     # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
-                    # move = get_mini_max_move_n_depth_pruning(board, turn, 3)
-                    move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
+                    move = get_mini_max_move_n_depth_pruning(board, turn, 2)
+                    # move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
                 elif game_type == GameType.RANDOM:
                     move = random.choice(move_list)
                 elif game_type == GameType.GREEDY:
@@ -698,13 +708,13 @@ def run_game():
                     move = random.choice(move_list)
             else:
                 if game_type == GameType.MANUAL:
-                    move = random.choice(move_list)
+                    # move = random.choice(move_list)
                     # move = get_greedy_move(board, move_list, turn)
                     # move = get_mini_max_move_one_depth(board, move_list, turn)
                     # move = get_mini_max_move_n_depth(board, move_list, turn, 2)
                     # move = get_human_move(move_list)
-                    # move = get_mini_max_move_n_depth_pruning(board, turn, 1)
-                    # move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 3)
+                    # move = get_mini_max_move_n_depth_pruning(board, turn, 2)
+                    move = get_mini_max_move_n_depth_pruning_heuristic(board, turn, 2)
                 elif game_type == GameType.RANDOM:
                     move = random.choice(move_list)
                 elif game_type == GameType.GREEDY:
@@ -737,7 +747,7 @@ def run_game():
             # print("Board State:", board.state)
 
             # wait for user to press a key
-            # input()
+            input()
 
         score_x = board.calculate_score(1)
         score_o = board.calculate_score(-1)
